@@ -84,28 +84,7 @@ class User(AbstractUser):
             return f'{self.first_name} {self.last_name}'
         return f'{self.first_name}'
     
-    def generate_login_response(self):
-        payload = {
-            'id': self.email,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'exp': timezone.now() + timezone.timedelta(days=30),
-            'iat': timezone.now()
-        }
-        
-        token = jwt.encode(payload, settings.JWT_KEY, algorithm='HS256')
-        response = Response({
-            'id': self.email,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'date_joined': self.date_joined,
-            'last_login': self.last_login,
-        }, status=status.HTTP_200_OK)
-
-        response.set_cookie(key='token', value=token, samesite='Lax', httponly=True, secure=False, domain=settings.COOKIE_DOMAIN)
-        return response
-    
-    
+    # TODO: Rename: send_user_code
     def send_verification_mail(self):
         verification_token = get_random_string(length=8)
         startingcontent = f"Greetings! <b>{self.first_name}</b>,\n\n Thank you for showing interest in our application. Please click on the confirmation link given below to finish setting up your account."
@@ -132,55 +111,3 @@ class User(AbstractUser):
             },
             template_name="email/verification_email.html"
         )
-
-    def send_forgot_password_mail(self, new_password):
-        verification_code = get_random_string(length=8)
-        
-        startingcontent = f"We received a request to reset your password for your account. If you didn't make this request, you can safely ignore this email."
-        endingcontent = f"If you have any questions or need assistance, please don't hesitate to contact our support team."
-        link = f"{settings.PASSWORD_RESET_URL}?token={verification_code}&email={self.email}"
-        linkcontent = "Reset Password"
-        
-        subject = "Password Reset - App Name"
-        to_email = self.email
-        
-        verification, created = ForgetPassword.objects.get_or_create(user=self)
-        verification.code = verification_code
-        verification.new_password = new_password
-        verification.save()
-        
-        send_html_email(
-            subject=subject, 
-            to_email=to_email, 
-            context={
-                "startingcontent": startingcontent,
-                "endingcontent": endingcontent,
-                "verification_code": verification_code,
-                "link": link,
-                "linkcontent": linkcontent,
-                "user_name": self.first_name,
-                "app_name": "App Name"
-            },
-            template_name="email/forgot_password_email.html"
-        )
-
-class VerificationCode(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    code = models.CharField(max_length=10)
-
-    def __str__(self):
-        return f"{self.user}"
-
-    
-class ForgetPassword(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    new_password = models.CharField(max_length=128)
-    code = models.CharField(max_length=10)
-    
-    def __str__(self):
-        return f"{self.user}"
-    
-    def save(self, *args, **kwargs):
-        if not self.new_password.startswith('pbkdf2_sha256$'):
-            self.new_password = make_password(self.new_password)
-        super().save(*args, **kwargs)

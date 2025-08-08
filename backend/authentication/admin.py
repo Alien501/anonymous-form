@@ -9,15 +9,6 @@ from .resources import UserResource
 from .models import *
 
 # Register your models here.
-class VerificationCodeInline(admin.StackedInline):
-    model = VerificationCode
-    extra = 0
-    can_delete = False
-
-class ForgotPasswordInline(admin.StackedInline):
-    model = ForgetPassword
-    extra = 0
-    can_delete = False
 
 @admin.register(User)
 class UserAdmin(ImportExportActionModelAdmin, ModelAdmin):
@@ -35,7 +26,6 @@ class UserAdmin(ImportExportActionModelAdmin, ModelAdmin):
     search_fields = ['email', 'first_name', 'last_name',]
     list_display = ['email', 'first_name', 'last_name', 'code',]
     resource_classes = [UserResource]
-    inlines = [VerificationCodeInline, ForgotPasswordInline]
     
     def _create_log_entry(self, request, obj, change_message, change=False):
         user_id = request if isinstance(request, int) else request.user.pk
@@ -61,15 +51,3 @@ class UserAdmin(ImportExportActionModelAdmin, ModelAdmin):
                 action_flag=CHANGE if change else ADDITION,
                 change_message=change_message,
             )
-
-@admin.register(VerificationCode)
-class VerificationCodeAdmin(admin.ModelAdmin):
-    list_display = ['user', 'code']
-    search_fields = ['user__email', 'user__first_name']
-    autocomplete_fields = ['user']
-
-@admin.register(ForgetPassword)
-class ForgotPasswordAdmin(ModelAdmin):
-    list_display = ['user', 'code']
-    search_fields = ['user__email', 'user__first_name']
-    autocomplete_fields = ['user']
