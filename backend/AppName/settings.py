@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'admin_honeypot',
     'organisation',
+    'forms'
 ]
 
 AUTH_USER_MODEL = 'authentication.User'
