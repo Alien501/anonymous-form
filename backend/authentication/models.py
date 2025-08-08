@@ -84,18 +84,15 @@ class User(AbstractUser):
             return f'{self.first_name} {self.last_name}'
         return f'{self.first_name}'
     
-    # TODO: Rename: send_user_code
-    def send_verification_mail(self):
-        verification_token = get_random_string(length=8)
-        startingcontent = f"Greetings! <b>{self.first_name}</b>,\n\n Thank you for showing interest in our application. Please click on the confirmation link given below to finish setting up your account."
+    def send_user_code(self):
+        user_code = self.code
+        startingcontent = f"Greetings! <b>{self.first_name}</b>,\n\n Thank you for showing interest in our application. Please make note of your User Code for Form Submission."
         endingcontent = f"If you have any general questions for us please do not hesitate to contact us. \n\nWe look forward to having you on board!\n\nWarm Regards,\nTeam App Name"
-        link = f"{settings.VERIFICATION_URL}?token={verification_token}&email={self.email}"
-        linkcontent = "Click this link to verify your email"
-        subject = "Email Verification"
+        subject = "Your User Code"
         to_email = self.email
         
         verification, created = VerificationCode.objects.get_or_create(user=self)
-        verification.code = verification_token
+        verification.code = user_code
         verification.save()
         
         send_html_email(
@@ -104,8 +101,7 @@ class User(AbstractUser):
             context={
                 "startingcontent": startingcontent, 
                 "endingcontent": endingcontent, 
-                "link": link, 
-                "linkcontent": linkcontent,
+                "user_code": user_code,
                 "user_name": self.first_name,
                 "app_name": "App Name"
             },

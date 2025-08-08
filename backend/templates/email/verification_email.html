@@ -44,19 +44,31 @@
             margin-bottom: 25px;
             color: #666;
         }
-        .verification-button {
-            display: inline-block;
-            background-color: #007bff;
-            color: white;
-            padding: 12px 30px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
+        .user-code-container {
+            background-color: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 20px;
             margin: 20px 0;
             text-align: center;
         }
-        .verification-button:hover {
-            background-color: #0056b3;
+        .user-code-label {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .user-code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            letter-spacing: 3px;
+            background-color: #ffffff;
+            padding: 15px 25px;
+            border-radius: 5px;
+            border: 1px solid #007bff;
+            display: inline-block;
+            margin: 10px 0;
         }
         .footer {
             margin-top: 30px;
@@ -99,10 +111,12 @@
                 {{ startingcontent|safe }}
             </div>
             
-            <div style="text-align: center;">
-                <a href="{{ link }}" class="verification-button">
-                    {{ linkcontent|default:"Verify Your Email" }}
-                </a>
+            <div class="user-code-container">
+                <div class="user-code-label">Your User Code:</div>
+                <div class="user-code">{{ user_code }}</div>
+                <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                    Please use this code when submitting forms
+                </div>
             </div>
             
             <div class="message">
