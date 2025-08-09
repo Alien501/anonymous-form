@@ -15,6 +15,7 @@ import appCss from "~/styles.css?url";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
 import Header from "~/components/pages/header";
+import { useInitializeCSRF } from "~/lib/api/form/useForm";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -29,11 +30,11 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Anonymous Form",
+        title: "AnomyForm",
       },
       {
         name: "description",
-        content: "Create and manage anonymous forms with ease.",
+        content: "Fill anonymous forms.",
       },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
@@ -42,6 +43,9 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootComponent() {
+  // Initialize CSRF token when the app starts
+  useInitializeCSRF();
+  
   return (
     <RootDocument>
       <Outlet />

@@ -31,13 +31,6 @@ DEBUG = ENVIRONMENT == 'development'
 
 ALLOWED_HOSTS = ['*']
 
-# CSRF
-CSRF_TRUSTED_ORIGINS = ['http://*.127.0.0.1','http://localhost',]
-CSRF_COOKIE_NAME="csrftoken"
-CSRF_COOKIE_HTTPONLY=True
-CSRF_COOKIE_SECURE=False
-CSRF_COOKIE_SAMESITE='Lax'
-CSRF_USE_SESSIONS=False
 CSRF_COOKIE_DOMAIN= config('COOKIE_DOMAIN')
 
 # Application definition
@@ -186,9 +179,30 @@ CORS_ORIGIN_ALLOW_ALL = False
 
 COOKIE_DOMAIN = config('COOKIE_DOMAIN')
 
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_AGE = 31449600
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
+
+# Security Headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
 
 CORS_ALLOWED_ORIGINS = [
   "http://localhost:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:5173",
 ]
 
 CORS_ALLOW_CREDENTIALS = True

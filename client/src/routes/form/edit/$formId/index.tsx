@@ -6,7 +6,8 @@ import { Checkbox } from "~/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 import { Label } from "~/components/ui/label";
-import { useForm } from "~/lib/api/form/useForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "~/components/ui/dialog";
+import { useForm, useSubmitFormResponse } from "~/lib/api/form/useForm";
 import { useState } from "react";
 import { 
   FileText, 
@@ -17,7 +18,8 @@ import {
   ChevronDown, 
   Upload,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  User
 } from "lucide-react";
 
 export const Route = createFileRoute("/form/edit/$formId/")({
@@ -28,8 +30,12 @@ function RouteComponent() {
   const { formId } = Route.useParams();
   const navigate = useNavigate();
   const { data: form, isLoading, error } = useForm(formId);
+  const { mutate: submitForm, isPending: isSubmitting, error: submitError } = useSubmitFormResponse();
   const [formResponses, setFormResponses] = useState<Record<string, any>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showUserCodeModal, setShowUserCodeModal] = useState(false);
+  const [userCode, setUserCode] = useState("");
+  const [userCodeError, setUserCodeError] = useState("");
 
   if (!formId) {
     navigate({ to: '/' });
@@ -113,9 +119,21 @@ function RouteComponent() {
     : 100;
   
   const handleSubmit = () => {
-    // Collect all form responses
-    const responses: Record<string, any> = {};
+    if (!isFormValid) return;
     
+    // Show user code modal
+    setShowUserCodeModal(true);
+  };
+
+  const handleUserCodeSubmit = () => {
+    if (!userCode.trim()) {
+      setUserCodeError("User code is required");
+      return;
+    }
+
+    setUserCodeError("");
+    
+    const responses: Record<string, any> = {};
     questions.forEach((formQuestion) => {
       const questionId = formQuestion.question.id;
       const question = formQuestion.question;
@@ -128,29 +146,31 @@ function RouteComponent() {
       };
     });
 
-    console.log('Form Submission:', JSON.stringify({
+    submitForm({
+      user_code: userCode.trim(),
       formId: form.id,
-      formName: form.name,
-      responses: responses,
-      timestamp: new Date().toISOString()
-    }));
-
-    // You can also add validation here before logging
-    const hasErrors = Object.values(responses).some((response: any) => 
-      response.required && (response.value === null || response.value === '' || 
-      (Array.isArray(response.value) && response.value.length === 0))
-    );
-
-    if (hasErrors) {
-      console.warn('Form has validation errors - some required fields are empty');
-    } else {
-      setIsSubmitted(true);
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setIsSubmitted(false);
-        setFormResponses({});
-      }, 3000);
-    }
+      responses: responses
+    }, {
+      onSuccess: (data) => {
+        console.log('Form submitted successfully:', data);
+        setIsSubmitted(true);
+        setShowUserCodeModal(false);
+        setUserCode("");
+        
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setFormResponses({});
+        }, 5000); // Reset form after 5 seconds
+      },
+      onError: (error: any) => {
+        console.error('Form submission failed:', error);
+        if (error.response?.data?.message) {
+          setUserCodeError(error.response.data.message);
+        } else {
+          setUserCodeError("An error occurred while submitting the form");
+        }
+      }
+    });
   };
   
   return (
@@ -192,7 +212,7 @@ function RouteComponent() {
                     <CheckCircle className="h-5 w-5" />
                     <span className="font-medium">Form submitted successfully!</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">Check the console for form data.</p>
+                  <p className="text-sm text-muted-foreground">Your response has been recorded.</p>
                 </div>
               ) : (
                 <>
@@ -220,9 +240,9 @@ function RouteComponent() {
                     size="default" 
                     className="px-6 py-2" 
                     onClick={handleSubmit}
-                    disabled={!isFormValid}
+                    disabled={!isFormValid || isSubmitting}
                   >
-                    Submit Form
+                    {isSubmitting ? "Submitting..." : "Submit Form"}
                   </Button>
                   
                   {!isFormValid && requiredQuestions.length > 0 && (
@@ -242,6 +262,66 @@ function RouteComponent() {
           </div>
         )}
       </div>
+
+      {/* User Code Modal */}
+      <Dialog open={showUserCodeModal} onOpenChange={setShowUserCodeModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <User className="h-5 w-5" />
+              <span>Enter Your User Code</span>
+            </DialogTitle>
+            <DialogDescription>
+              Please enter your unique user code to submit this form. This helps us prevent duplicate submissions.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="user-code">User Code</Label>
+              <Input
+                id="user-code"
+                type="text"
+                placeholder="Enter your 6-digit user code"
+                value={userCode}
+                onChange={(e) => {
+                  setUserCode(e.target.value.toUpperCase());
+                  if (userCodeError) setUserCodeError("");
+                }}
+                className="text-center text-lg font-mono tracking-widest"
+                maxLength={6}
+                autoFocus
+              />
+              {userCodeError && (
+                <div className="flex items-center space-x-2 text-red-500 text-sm">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{userCodeError}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter className="flex-col sm:flex-row space-y-2 sm:space-y-0">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowUserCodeModal(false);
+                setUserCode("");
+                setUserCodeError("");
+              }}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUserCodeSubmit}
+              disabled={!userCode.trim() || isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Form"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

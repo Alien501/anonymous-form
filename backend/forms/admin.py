@@ -15,13 +15,19 @@ class FormQuestionInline(admin.TabularInline):
     fields = ['question', 'form_index']
     readonly_fields = ['created_at', 'updated_at']
 
+class FormUserInline(admin.TabularInline):
+    model = FormUser
+    extra = 0
+    readonly_fields = ['created_at', 'updated_at']
+    can_delete = False
+
 @admin.register(Form)
 class FormAdmin(ModelAdmin):
     compressed_fields = True
-    list_display = ['name', 'form_link']
+    list_display = ['name', 'form_link', 'submission_count']
     search_fields = ['name',]
     list_filter = ['roles',]
-    inlines = [FormQuestionInline]
+    inlines = [FormQuestionInline, FormUserInline]
     fieldsets = (
         ('Form Details', {'fields': ('id', 'name','enable')}),
         ('Form Configuration', {'fields': ('roles', 'department', 'group')}),
@@ -32,6 +38,11 @@ class FormAdmin(ModelAdmin):
     def form_link(self, obj):
         return format_html(f"<a target='_' href='{settings.CLIENT_URL}/form/edit/{obj.id}'>View Form</a>")
     
+    def submission_count(self, obj):
+        count = FormUser.objects.filter(form=obj).count()
+        return count
+    submission_count.short_description = 'Submissions'
+
 @admin.register(Questions)
 class QuestionsAdmin(ModelAdmin):
     list_display = ['id', 'question', 'answer_type']
@@ -75,7 +86,18 @@ class FormResponseAdmin(ModelAdmin):
     
 @admin.register(FormUser)
 class FormUserAdmin(ModelAdmin):
-    list_display = ['user', 'form']
-    search_fields = list_display
-    list_filter = ['form']
+    list_display = ['user', 'form', 'user_code', 'created_at']
+    search_fields = ['user__code', 'user__email', 'form__name']
+    list_filter = ['form', 'created_at']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Form Submission', {'fields': ('user', 'form')}),
+        ('User Info', {'fields': ('user_code',)}),
+        ('Meta', {'fields': ('created_at', 'updated_at')}),
+    )
+    
+    def user_code(self, obj):
+        return obj.user.code if obj.user.code else 'N/A'
+    user_code.short_description = 'User Code'
     

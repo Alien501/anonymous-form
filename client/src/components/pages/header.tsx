@@ -10,7 +10,7 @@ export default function Header() {
             to="/" 
             className="text-xl font-bold text-foreground hover:text-primary transition-colors"
           >
-            Anonymous Form
+            AnomyForm
           </Link>
         </div>
 
