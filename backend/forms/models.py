@@ -21,16 +21,31 @@ class Questions(models.Model):
     ANSWER_TYPES = (
         ('text', 'Text'),
         ('number', 'Number'),
+        ('boolean', 'Boolean'),
         ('radio', 'Radio'),
         ('checkbox', 'Checkbox'),
         ('select', 'Select'),
         ('file', 'File'),
     )
+    FILE_TYPE = (
+        ('none', 'None'),
+        ('img', 'image/*'),
+        ('pdf', 'pdf/*'),
+        ('docx', 'doc/*'),
+        ('csv', 'csv/*'),
+        ('txt', 'txt/*')
+    )
     
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
     question = models.CharField("Question", max_length=2000, null=False, blank=False)
     required = models.BooleanField("Required", default=False)
+    
     answer_type = models.CharField("Answer Type", max_length=30, choices=ANSWER_TYPES, default='text')
+    min_len = models.IntegerField("Min Length", default=0)
+    max_len = models.IntegerField("Max Length", default=10)
+    options = models.TextField("Options seperated by ||")
+    file_type = models.CharField("File Type", max_length=50, default='none', choices=FILE_TYPE)
+    
     created_at = models.DateTimeField("Created At", auto_now_add=True)
     updated_at = models.DateTimeField("Updated At", auto_now=True)
     
@@ -55,3 +70,12 @@ class FormQuestion(models.Model):
             self.form_index = (last_index or 0) + 1
         
         super().save(*args, **kwargs)
+        
+class FormResponse(models.Model):
+    id = models.UUIDField(default=uuid.uuid1, editable=False, primary_key=True, unique=True)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    response = models.JSONField("User Response")
+    
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+    updated_at = models.DateTimeField("Updated At", auto_now=True)
+    

@@ -10,7 +10,7 @@ class FormQuestionInline(admin.TabularInline):
     model = FormQuestion
     extra = 1
     fields = ['question', 'form_index']
-    readonly_fields = ['form_index', 'created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at']
 
 @admin.register(Form)
 class FormAdmin(ModelAdmin):
@@ -33,8 +33,9 @@ class QuestionsAdmin(ModelAdmin):
     list_filter = ['answer_type']
     
     fieldsets = (
-        ('Question', {'fields': ('id', 'question', 'required')}),
-        ('Answer', {'fields': ('answer_type',)}),
+        ('Question', {'fields': ('id', 'question',)}),
+        ('Answer Config', {'fields': ('answer_type', 'min_len', 'max_len', 'required',)}),
+        ('Answer', {'fields': ('options', 'file_type')}),
         ('Question Meta', {'fields': ('created_at', 'updated_at')})
     )
     
@@ -50,4 +51,18 @@ class FormQuestionAdmin(ModelAdmin):
         ('Meta', {'fields': ('created_at', 'updated_at')})
     )
     
-    readonly_fields = ['id', 'form_index', 'created_at', 'updated_at']
+    readonly_fields = ['id', 'created_at', 'updated_at']
+    
+@admin.register(FormResponse)
+class FormResponseAdmin(ModelAdmin):
+    list_display = ['id', 'form', 'created_at', 'updated_at']
+    search_fields = ['form']
+    list_filter = ['form']
+    
+    fieldsets = (
+        ('Response', {'fields': ('id', 'form')}),
+        ('User Response', {'fields': ('response',)}),
+        ('Meta', {'fields': ('created_at', 'updated_at')}),
+    )
+    
+    readonly_fields = ['id', 'created_at', 'updated_at']
