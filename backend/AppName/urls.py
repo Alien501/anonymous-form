@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
     path('admin-back-office/', admin.site.urls),
     path('api/', include('authentication.urls')),
+    path('api/', include('forms.urls')),
     path('api-auth/', include('rest_framework.urls')),
 ]
 

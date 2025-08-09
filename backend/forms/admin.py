@@ -66,3 +66,10 @@ class FormResponseAdmin(ModelAdmin):
     )
     
     readonly_fields = ['id', 'created_at', 'updated_at']
+    
+@admin.register(FormUser)
+class FormUserAdmin(ModelAdmin):
+    list_display = ['user', 'form']
+    search_fields = list_display
+    list_filter = ['form']
+    

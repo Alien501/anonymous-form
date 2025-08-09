@@ -1,7 +1,7 @@
 from django.db import models
 from organisation.models import *
 
-from time import timezone
+from authentication.models import User
 
 import uuid
 
@@ -71,6 +71,13 @@ class FormQuestion(models.Model):
         
         super().save(*args, **kwargs)
         
+class FormUser(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    
+    created_at = models.DateTimeField("Created At", auto_now_add=True)
+    updated_at = models.DateTimeField("Updated At", auto_now=True)
+    
 class FormResponse(models.Model):
     id = models.UUIDField(default=uuid.uuid1, editable=False, primary_key=True, unique=True)
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
