@@ -1,6 +1,9 @@
 from django.contrib import admin
 
 from django.contrib.admin import ModelAdmin
+from django.conf import settings
+
+from django.utils.html import format_html
 
 from .models import *
 
@@ -15,7 +18,7 @@ class FormQuestionInline(admin.TabularInline):
 @admin.register(Form)
 class FormAdmin(ModelAdmin):
     compressed_fields = True
-    list_display = ['name',]
+    list_display = ['name', 'form_link']
     search_fields = ['name',]
     list_filter = ['roles',]
     inlines = [FormQuestionInline]
@@ -25,6 +28,9 @@ class FormAdmin(ModelAdmin):
         ('Form Meta', {'fields': ('created_at', 'updated_at')}),
     )
     readonly_fields = ['created_at', 'updated_at', 'id']
+    
+    def form_link(self, obj):
+        return format_html(f"<a target='_' href='{settings.CLIENT_URL}/form/edit/{obj.id}'>View Form</a>")
     
 @admin.register(Questions)
 class QuestionsAdmin(ModelAdmin):

@@ -240,5 +240,6 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 # Email verification settings
 VERIFICATION_URL = config('VERIFICATION_URL', 'http://localhost:3000/verify-email')
 PASSWORD_RESET_URL = config('PASSWORD_RESET_URL', 'http://localhost:3000/reset-password')
+CLIENT_URL = config('CLIENT_URL', 'https://localhost:5173')
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000

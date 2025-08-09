@@ -14,6 +14,7 @@ import appCss from "~/styles.css?url";
 
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
+import Header from "~/components/pages/header";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -28,11 +29,11 @@ export const Route = createRootRouteWithContext<{
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "React TanStarter",
+        title: "Anonymous Form",
       },
       {
         name: "description",
-        content: "A minimal starter template for 🏝️ TanStack Start.",
+        content: "Create and manage anonymous forms with ease.",
       },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
@@ -57,7 +58,10 @@ function RootDocument({ children }: { readonly children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
-          {children}
+          <Header />
+          <main className="min-h-screen bg-background lg:w-[80%] lg:mx-auto">
+            {children}
+          </main>
           <Toaster richColors />
         </ThemeProvider>
 

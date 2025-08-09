@@ -17,6 +17,9 @@ class Form(models.Model):
     created_at = models.DateTimeField("Created At", auto_now_add=True)
     updated_at = models.DateTimeField("Updated At", auto_now=True)
     
+    def __str__(self):
+        return self.name
+    
 class Questions(models.Model):
     ANSWER_TYPES = (
         ('text', 'Text'),
@@ -29,11 +32,16 @@ class Questions(models.Model):
     )
     FILE_TYPE = (
         ('none', 'None'),
-        ('img', 'image/*'),
-        ('pdf', 'pdf/*'),
-        ('docx', 'doc/*'),
-        ('csv', 'csv/*'),
-        ('txt', 'txt/*')
+        ('image/*', 'Images (jpg, png, gif, etc.)'),
+        ('application/pdf', 'PDF files'),
+        ('application/msword', 'Word documents (.doc)'),
+        ('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'Word documents (.docx)'),
+        ('text/csv', 'CSV files'),
+        ('text/plain', 'Text files (.txt)'),
+        ('application/vnd.ms-excel', 'Excel files (.xls)'),
+        ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'Excel files (.xlsx)'),
+        ('application/zip', 'ZIP archives'),
+        ('*/*', 'All file types'),
     )
     
     id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, primary_key=True)
@@ -41,13 +49,16 @@ class Questions(models.Model):
     required = models.BooleanField("Required", default=False)
     
     answer_type = models.CharField("Answer Type", max_length=30, choices=ANSWER_TYPES, default='text')
-    min_len = models.IntegerField("Min Length", default=0)
-    max_len = models.IntegerField("Max Length", default=10)
-    options = models.TextField("Options seperated by ||")
-    file_type = models.CharField("File Type", max_length=50, default='none', choices=FILE_TYPE)
+    min_len = models.IntegerField("Min Length (characters for text, MB for files)", default=0)
+    max_len = models.IntegerField("Max Length (characters for text, MB for files)", default=10)
+    options = models.TextField("Options seperated by ||", null=True, blank=True)
+    file_type = models.CharField("File Type", max_length=150, default='none', choices=FILE_TYPE)
     
     created_at = models.DateTimeField("Created At", auto_now_add=True)
     updated_at = models.DateTimeField("Updated At", auto_now=True)
+    
+    def __str__(self):
+        return f"{self.question}"
     
 class FormQuestion(models.Model):
     id = models.UUIDField(default=uuid.uuid1, editable=False, primary_key=True, unique=True)
@@ -70,13 +81,19 @@ class FormQuestion(models.Model):
             self.form_index = (last_index or 0) + 1
         
         super().save(*args, **kwargs)
-        
+    
+    def __str__(self):
+        return f"{self.form} - {self.question}"
+    
 class FormUser(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
     
     created_at = models.DateTimeField("Created At", auto_now_add=True)
     updated_at = models.DateTimeField("Updated At", auto_now=True)
+    
+    def __str__(self):
+        return f"{self.user.get_name()} - {self.form.name}"
     
 class FormResponse(models.Model):
     id = models.UUIDField(default=uuid.uuid1, editable=False, primary_key=True, unique=True)

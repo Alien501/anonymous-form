@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from "./routes/__root";
 import { Route as DashboardRouteRouteImport } from "./routes/dashboard/route";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as DashboardIndexRouteImport } from "./routes/dashboard/index";
+import { Route as FormEditFormIdIndexRouteImport } from "./routes/form/edit/$formId/index";
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: "/dashboard",
@@ -28,33 +29,42 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: "/",
   getParentRoute: () => DashboardRouteRoute,
 } as any);
+const FormEditFormIdIndexRoute = FormEditFormIdIndexRouteImport.update({
+  id: "/form/edit/$formId/",
+  path: "/form/edit/$formId/",
+  getParentRoute: () => rootRouteImport,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/dashboard": typeof DashboardRouteRouteWithChildren;
   "/dashboard/": typeof DashboardIndexRoute;
+  "/form/edit/$formId": typeof FormEditFormIdIndexRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/dashboard": typeof DashboardIndexRoute;
+  "/form/edit/$formId": typeof FormEditFormIdIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/dashboard": typeof DashboardRouteRouteWithChildren;
   "/dashboard/": typeof DashboardIndexRoute;
+  "/form/edit/$formId/": typeof FormEditFormIdIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/dashboard" | "/dashboard/";
+  fullPaths: "/" | "/dashboard" | "/dashboard/" | "/form/edit/$formId";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/dashboard";
-  id: "__root__" | "/" | "/dashboard" | "/dashboard/";
+  to: "/" | "/dashboard" | "/form/edit/$formId";
+  id: "__root__" | "/" | "/dashboard" | "/dashboard/" | "/form/edit/$formId/";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren;
+  FormEditFormIdIndexRoute: typeof FormEditFormIdIndexRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -80,6 +90,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DashboardIndexRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    "/form/edit/$formId/": {
+      id: "/form/edit/$formId/";
+      path: "/form/edit/$formId";
+      fullPath: "/form/edit/$formId";
+      preLoaderRoute: typeof FormEditFormIdIndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -98,6 +115,7 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  FormEditFormIdIndexRoute: FormEditFormIdIndexRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -15,7 +15,7 @@ class FormQuestionSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = FormQuestion
-        fields = ['id', 'question', 'form_index',]
+        fields = ['id', 'question', 'form_index']
 
 
 class FormSerializer(serializers.ModelSerializer):
@@ -24,8 +24,7 @@ class FormSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form
         fields = [
-            'id', 'name', 
-            'created_at', 'updated_at', 'form_questions'
+            'id', 'name', 'form_questions'
         ]
     
     def get_form_questions(self, obj):
