@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ThemeToggle } from "~/components/theme-toggle";
+import GetUserCode from "./get-user-code";
 
 export default function Header() {
   return (
@@ -15,6 +16,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center space-x-4">
+          <GetUserCode />
           <ThemeToggle />
         </div>
       </div>

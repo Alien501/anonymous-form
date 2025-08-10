@@ -86,14 +86,10 @@ class User(AbstractUser):
     
     def send_user_code(self):
         user_code = self.code
-        startingcontent = f"Greetings! <b>{self.first_name}</b>,\n\n Thank you for showing interest in our application. Please make note of your User Code for Form Submission."
-        endingcontent = f"If you have any general questions for us please do not hesitate to contact us. \n\nWe look forward to having you on board!\n\nWarm Regards,\nTeam App Name"
+        startingcontent = f"Greetings! <b>{self.first_name}</b>,\n\n Please make note of your User Code for Form Submission. <b>Don't share it with anyone else</b>"
+        endingcontent = f"If you have any general questions for us please do not hesitate to contact us. \n\nWe look forward to having you on board!\n\nWarm Regards,\nTeam AnonyForm"
         subject = "Your User Code"
         to_email = self.email
-        
-        verification, created = VerificationCode.objects.get_or_create(user=self)
-        verification.code = user_code
-        verification.save()
         
         send_html_email(
             subject=subject, 
@@ -103,7 +99,7 @@ class User(AbstractUser):
                 "endingcontent": endingcontent, 
                 "user_code": user_code,
                 "user_name": self.first_name,
-                "app_name": "App Name"
+                "app_name": "AnonyForm"
             },
             template_name="email/verification_email.html"
         )

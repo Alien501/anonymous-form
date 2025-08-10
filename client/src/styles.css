@@ -200,4 +200,8 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  button:hover {
+    cursor: pointer;
+  }
 }

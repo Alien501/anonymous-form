@@ -36,5 +36,3 @@ class ResendUserCodeAPI(APIView):
         except Exception as e:
             print(e)
             return Response({'detail': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        
-    authentication_classes = [IsAuthenticated]

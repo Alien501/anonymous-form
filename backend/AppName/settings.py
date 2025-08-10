@@ -184,6 +184,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://forms.alien501.in/',
     'https://forms-api.alien501.in',
     'https://forms-api.alien501.in/',
+    'http://localhost:3000',
 ]
 
 CSRF_COOKIE_SAMESITE = 'Lax'
