@@ -91,18 +91,18 @@ class FormResponseAdmin(ModelAdmin):
     
 @admin.register(FormUser)
 class FormUserAdmin(ModelAdmin):
-    list_display = ['user', 'form', 'user_code', 'created_at']
+    list_display = ['user', 'form', 'user__code', 'created_at']
     search_fields = ['user__code', 'user__email', 'form__name']
     list_filter = ['form', 'created_at']
     readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
         ('Form Submission', {'fields': ('user', 'form')}),
-        ('User Info', {'fields': ('user_code',)}),
+        # ('User Info', {'fields': ('user__code',)}),
         ('Meta', {'fields': ('created_at', 'updated_at')}),
     )
     
-    def user_code(self, obj):
-        return obj.user.code if obj.user.code else 'N/A'
-    user_code.short_description = 'User Code'
+    # def user_code(self, obj):
+    #     return obj.user.code if obj.user.code else 'N/A'
+    # user_code.short_description = 'User Code'
     
