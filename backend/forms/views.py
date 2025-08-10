@@ -1,4 +1,6 @@
 import logging
+import os
+import uuid
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -8,6 +10,8 @@ from django.db import transaction
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.conf import settings
+import json
 
 from .models import Form, FormResponse, FormUser
 from .serializers import FormSerializer
@@ -41,9 +45,20 @@ class GetCSRFToken(APIView):
 class SubmitFormResponse(APIView):
     def post(self, request):
         try:
+            print("files", request.FILES)
             user_code = request.data.get('user_code')
             form_id = request.data.get('formId')
-            responses = request.data.get('responses', {})
+            responses_data = request.data.get('responses', '{}')
+            
+            # Parse responses JSON
+            try:
+                responses = json.loads(responses_data) if isinstance(responses_data, str) else responses_data
+            except json.JSONDecodeError:
+                logger.error("Invalid JSON in responses data")
+                return Response(
+                    {"message": "Invalid form data format!"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
             logger.info(f"Form submission attempt - User: {user_code}, Form: {form_id}")
             
@@ -115,9 +130,36 @@ class SubmitFormResponse(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
+            # Process file uploads
+            for question_id, response_data in responses.items():
+                if response_data.get('answer_type') == 'file' and response_data.get('value'):
+                    file_key = f'file_{question_id}'
+                    if file_key in request.FILES:
+                        uploaded_file = request.FILES[file_key]
+                        
+                        # Create upload directory if it doesn't exist
+                        upload_dir = os.path.join(settings.MEDIA_ROOT, 'form_uploads', str(form_id), str(user.id))
+                        os.makedirs(upload_dir, exist_ok=True)
+                        
+                        # Generate unique filename
+                        file_extension = os.path.splitext(uploaded_file.name)[1]
+                        unique_filename = f"{uuid.uuid4()}{file_extension}"
+                        file_path = os.path.join(upload_dir, unique_filename)
+                        
+                        # Save the file
+                        with open(file_path, 'wb+') as destination:
+                            for chunk in uploaded_file.chunks():
+                                destination.write(chunk)
+                        
+                        # Update response with file path
+                        relative_path = os.path.join('form_uploads', str(form_id), str(user.id), unique_filename)
+                        response_data['value']['file_path'] = relative_path
+                        response_data['value']['original_name'] = uploaded_file.name
+            
             # Store the form response and create FormUser entry
             print(responses)
             with transaction.atomic():
+                
                 form_response = FormResponse.objects.create(
                     form=form,
                     response=responses

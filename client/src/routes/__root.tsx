@@ -12,9 +12,9 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import appCss from "~/styles.css?url";
 
+import Header from "~/components/pages/header";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
-import Header from "~/components/pages/header";
 import { useInitializeCSRF } from "~/lib/api/form/useForm";
 
 export const Route = createRootRouteWithContext<{
@@ -45,7 +45,7 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
   // Initialize CSRF token when the app starts
   useInitializeCSRF();
-  
+
   return (
     <RootDocument>
       <Outlet />
@@ -63,7 +63,7 @@ function RootDocument({ children }: { readonly children: React.ReactNode }) {
       <body>
         <ThemeProvider>
           <Header />
-          <main className="min-h-screen bg-background lg:w-[80%] lg:mx-auto">
+          <main className="bg-background min-h-screen lg:mx-auto lg:w-[80%]">
             {children}
           </main>
           <Toaster richColors />

@@ -1,9 +1,15 @@
 from django.db import models
 from organisation.models import *
 
+from django.conf import settings
+
 from authentication.models import User
 
-import uuid
+import uuid, os
+import logging
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 # Create your models here.
 class Form(models.Model):
@@ -103,3 +109,36 @@ class FormResponse(models.Model):
     created_at = models.DateTimeField("Created At", auto_now_add=True)
     updated_at = models.DateTimeField("Updated At", auto_now=True)
     
+    def __str__(self):
+        return f"{id}-{self.form.name}"
+    
+    def delete(self, using=None, keep_parents=False):
+        try:
+            file_responses = []
+            for response in self.response.values():
+                if isinstance(response, dict) and response.get('answer_type') == 'file':
+                    file_responses.append(response)
+            
+            for file_response in file_responses:
+                try:
+                    file_value = file_response.get('value', {})
+                    if isinstance(file_value, dict) and 'file_path' in file_value:
+                        file_path = file_value['file_path']
+                        upload_path = os.path.join(settings.MEDIA_ROOT, file_path)
+                        
+                        if os.path.exists(upload_path):
+                            os.remove(upload_path)
+                            logger.info(f"Successfully deleted file: {upload_path}")
+                        else:
+                            logger.warning(f"File not found during deletion: {upload_path}")
+                    else:
+                        logger.warning(f"Invalid file response structure: {file_response}")
+                except (OSError, IOError) as e:
+                    logger.error(f"Error deleting file {upload_path}: {str(e)}")
+                except Exception as e:
+                    logger.error(f"Unexpected error processing file response: {str(e)}")
+                    
+        except Exception as e:
+            logger.error(f"Error in FormResponse delete method: {str(e)}")
+        
+        return super().delete(using=using, keep_parents=keep_parents)

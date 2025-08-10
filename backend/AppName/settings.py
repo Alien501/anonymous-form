@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'authentication',
     'debug_toolbar',
     'admin_honeypot',
+    'chartjs',
     'organisation',
     'forms'
 ]
@@ -259,3 +260,8 @@ PASSWORD_RESET_URL = config('PASSWORD_RESET_URL', 'http://localhost:3000/reset-p
 CLIENT_URL = config('CLIENT_URL', 'https://localhost:5173')
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
+DATA_UPLOAD_MAX_NUMBER_FILES = 100

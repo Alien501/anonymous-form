@@ -84,6 +84,11 @@ class FormResponseAdmin(ModelAdmin):
     
     readonly_fields = ['id', 'created_at', 'updated_at']
     
+    def delete_queryset(self, request, queryset):
+        print("Delete queryset is being called")
+        for obj in queryset.all():
+            obj.delete()
+    
 @admin.register(FormUser)
 class FormUserAdmin(ModelAdmin):
     list_display = ['user', 'form', 'user_code', 'created_at']
