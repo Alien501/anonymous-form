@@ -29,7 +29,7 @@ ENVIRONMENT = config('ENVIRONMENT', 'production')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENVIRONMENT == 'development'
 
-ALLOWED_HOSTS = ['forms.alien501.in', 'forms-api.alien501.in']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'forms.alien501.in', 'forms-api.alien501.in']
 
 CSRF_COOKIE_DOMAIN= config('COOKIE_DOMAIN')
 

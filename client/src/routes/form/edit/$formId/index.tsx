@@ -21,6 +21,7 @@ import {
   CheckCircle,
   User
 } from "lucide-react";
+import { Textarea } from "~/components/ui/textarea";
 
 export const Route = createFileRoute("/form/edit/$formId/")({
   component: RouteComponent,
@@ -431,9 +432,8 @@ function QuestionRenderer({ question, index, total, onValueChange }: QuestionRen
     switch (question.answer_type) {
       case 'text': {
         return (
-          <Input
-            type="text"
-            placeholder="Type your answer here..."
+          <Textarea
+            placeholder="Type your answer here"
             value={value as string}
             onChange={(e) => handleInputChange(e.target.value)}
             className="py-2 px-3 border-2 focus:border-primary"
@@ -526,7 +526,7 @@ function QuestionRenderer({ question, index, total, onValueChange }: QuestionRen
         const selectOptions = question.options ? question.options.split('||') : [];
         return (
           <Select value={value as string} onValueChange={(newValue) => handleInputChange(newValue)}>
-            <SelectTrigger className="w-full py-2 px-3 border-2 border-muted-foreground focus:border-primary">
+            <SelectTrigger className="w-full py-2 px-3 border-2 border-muted-foreground/10 focus:border-primary">
               <SelectValue placeholder="Select an option..." />
             </SelectTrigger>
             <SelectContent>
@@ -626,15 +626,15 @@ function QuestionRenderer({ question, index, total, onValueChange }: QuestionRen
   };
 
   return (
-    <Card className="shadow-none rounded-md hover:shadow-xl light:shadow-accent/90 transition-shadow">
+    <Card className="shadow-none rounded-md hover:shadow-xl shadow-accent/10 transition-shadow">
       <CardHeader>
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
             {getQuestionIcon()}
           </div>
           <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="text-xs text-muted-foreground font-medium">
+            <div className="flex items-center space-x-2 mb-0">
+              <span className="text-xs text-muted-foreground font-medium bg-background/20 px-1 py-0.5 rounded-md">
                 Question {index} of {total}
               </span>
               {question.required && (
