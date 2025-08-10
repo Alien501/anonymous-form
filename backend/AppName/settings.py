@@ -29,7 +29,7 @@ ENVIRONMENT = config('ENVIRONMENT', 'production')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENVIRONMENT == 'development'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['forms.alien501.in', 'forms-api.alien501.in']
 
 CSRF_COOKIE_DOMAIN= config('COOKIE_DOMAIN')
 
@@ -106,7 +106,7 @@ WSGI_APPLICATION = 'AppName.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if DEBUG:
+if True:
     # Dev
     DATABASES = {
         'default': {
@@ -181,15 +181,14 @@ COOKIE_DOMAIN = config('COOKIE_DOMAIN')
 
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
+    'https://forms.alien501.in/',
+    'https://forms-api.alien501.in',
+    'https://forms-api.alien501.in/',
 ]
 
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_AGE = 31449600
 CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
 
@@ -203,6 +202,8 @@ CORS_ALLOWED_ORIGINS = [
   "http://localhost:5173",
   "http://127.0.0.1:3000",
   "http://127.0.0.1:5173",
+  'https://forms.alien501.in',
+  'https://forms-api.alien501.in',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
