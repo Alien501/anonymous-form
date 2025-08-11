@@ -1,9 +1,9 @@
 import { UserIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useUserCode } from "~/lib/api/form/useUserCode";
-import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "../ui/dialog";
-import { Input } from "../ui/input";
+import { Button } from "~/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
 
 export default function GetUserCode() {
   const [email, setEmail] = useState("");

@@ -30,12 +30,12 @@ jobs:
       - run: cd client && pnpm install
       - run: cd client && pnpm build
         env:
-          NITRO_PRESET: github_pages
+          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL || 'https://your-api-domain.com/api' }}
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.output/public
+          path: client/.output/public
 
   deploy:
     needs: build

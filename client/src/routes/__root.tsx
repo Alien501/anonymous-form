@@ -15,7 +15,7 @@ import appCss from "~/styles.css?url";
 import Header from "~/components/pages/header";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
-import { useInitializeCSRF } from "../lib/api/form/useForm";
+import { useInitializeCSRF } from "~/lib/api/form/useForm";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
