@@ -17,7 +17,7 @@ export default defineConfig({
         quoteStyle: "double",
         semicolons: true,
       },
-      target: "vercel",
+      target: "github_pages",
 
       // https://tanstack.com/start/latest/docs/framework/react/hosting#deployment
       // target: "node-server",

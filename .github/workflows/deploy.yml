@@ -1,0 +1,45 @@
+name: "Deploy client"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+    - run: corepack enable
+    - uses: actions/setup-node@v3
+      with:
+        node-version: "22"
+    
+    - run: cd client
+    - run: pnpm install install
+    - run: pnpm build
+      env:
+        NITRO_PRESET: github_pages
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: ./.output/public
+
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying to Github pages
+        id: deployment
+        uses: actions/deploy-pages@v1
