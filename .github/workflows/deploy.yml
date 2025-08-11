@@ -10,11 +10,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4  # Updated to v4
+        with:
+          path: .  # Explicitly set checkout path
+      
       - run: corepack enable
-      - uses: actions/setup-node@v3
+      
+      - uses: actions/setup-node@v4  # Updated to v4
         with:
           node-version: "22"
+      
+      - name: Debug - Show current directory
+        run: |
+          pwd
+          ls -la
+          echo "Client directory:"
+          ls -la client/
       
       - run: cd client && pnpm install
       - run: cd client && pnpm build
@@ -24,7 +35,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./client/.output/public
+          path: ./.output/public
 
   deploy:
     needs: build
@@ -41,4 +52,4 @@ jobs:
     steps:
       - name: Deploying to Github pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4  # Updated to v4
