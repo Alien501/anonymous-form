@@ -12,7 +12,7 @@ from .models import *
 
 @admin.register(User)
 class UserAdmin(ImportExportActionModelAdmin, ModelAdmin):
-    compressed_fields = True
+    # compressed_fields = True
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Personal Info', {'fields': ('first_name', 'last_name', 'code')}),
