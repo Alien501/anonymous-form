@@ -16,16 +16,15 @@ jobs:
         with:
           node-version: "22"
       
-      - run: cd client
-      - run: pnpm install
-      - run: pnpm build
+      - run: cd client && pnpm install
+      - run: cd client && pnpm build
         env:
           NITRO_PRESET: github_pages
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./client/.output/public
+          path: ./.output/public
 
   deploy:
     needs: build
