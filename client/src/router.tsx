@@ -1,5 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-import { createHashHistory, createRouter as createTanStackRouter } from "@tanstack/react-router";
+import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
 import { DefaultCatchBoundary } from "~/components/default-catch-boundary";
@@ -27,7 +27,6 @@ export function createRouter() {
     defaultNotFoundComponent: DefaultNotFound,
     scrollRestoration: true,
     defaultStructuralSharing: true,
-    history: createHashHistory(),
   });
 
   setupRouterSsrQueryIntegration({
