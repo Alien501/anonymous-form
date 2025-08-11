@@ -14,6 +14,7 @@
     "deps:major": "pnpm dlx taze@latest major -Ilw",
     "ui": "pnpm dlx shadcn@latest"
   },
+  "homepage": "https://alien501.github.io/anonymous-form/",
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-dialog": "^1.1.14",

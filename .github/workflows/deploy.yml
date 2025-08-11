@@ -10,27 +10,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4  # Updated to v4
+      - uses: actions/checkout@v4 
         with:
-          path: .  # Explicitly set checkout path
+          path: .
       
       - run: corepack enable
       
-      - uses: actions/setup-node@v4  # Updated to v4
+      - uses: actions/setup-node@v4 
         with:
           node-version: "22"
-      
-      - name: Debug - Show current directory
-        run: |
-          pwd
-          ls -la
-          echo "Client directory:"
-          ls -la client/
       
       - run: cd client && pnpm install
       - run: cd client && pnpm build
         env:
-          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL || 'https://your-api-domain.com/api' }}
+          VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -52,4 +45,4 @@ jobs:
     steps:
       - name: Deploying to Github pages
         id: deployment
-        uses: actions/deploy-pages@v4  # Updated to v4
+        uses: actions/deploy-pages@v4 
