@@ -36,6 +36,7 @@ CSRF_COOKIE_DOMAIN= config('COOKIE_DOMAIN')
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -265,3 +266,55 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 100000
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 DATA_UPLOAD_MAX_NUMBER_FILES = 100
+
+USE_UNFOLD = True
+
+# Unfold Configuration
+UNFOLD = {
+    "SITE_TITLE": "Anonymous Form Admin",
+    "SITE_HEADER": "Anonymous Form Administration",
+    "SITE_SUBHEADER": "Manage forms and user data",
+    "SITE_SYMBOL": "admin_panel_settings",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "COLORS": {
+        "base": {
+            "50": "250, 250, 249",
+            "100": "245, 245, ,244",
+            "200": "231, 229, 228",
+            "300": "214, 211, 209",
+            "400": "168, 162, 158",
+            "500": "120, 113, 108",
+            "600": "87, 83, 78",
+            "700": "68, 64, 60",
+            "800": "41, 37, 36",
+            "900": "28, 25, 23",
+            "950": "12, 10, 9",
+        },
+        "primary": {
+            "50": "255, 251, 235",
+            "100": "254, 243, 199",
+            "200": "253, 230, 138",
+            "300": "252, 211, 77",
+            "400": "251, 191, 36",
+            "500": "245, 158, 11",
+            "600": "217, 119, 6",
+            "700": "180, 83, 9",
+            "800": "146, 64, 14",
+            "900": "120, 53, 15",
+            "950": "69, 26, 3",
+        },
+        "font": {
+            "subtle-light": "var(--color-base-500)",  # text-base-500
+            "subtle-dark": "var(--color-base-400)",  # text-base-400
+            "default-light": "var(--color-base-600)",  # text-base-600
+            "default-dark": "var(--color-base-300)",  # text-base-300
+            "important-light": "var(--color-base-900)",  # text-base-900
+            "important-dark": "var(--color-base-100)",  # text-base-100
+        },
+    },
+    "LOGIN": {
+        "image": None,
+        "redirect_after": None,
+    },
+}

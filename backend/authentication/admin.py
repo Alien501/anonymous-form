@@ -1,5 +1,11 @@
 from django.contrib import admin
-from django.contrib.admin import ModelAdmin
+from django.conf import settings
+
+if settings.USE_UNFOLD:
+    from unfold.admin import ModelAdmin
+else:
+    from django.contrib.admin import ModelAdmin
+
 from import_export.admin import ImportExportActionModelAdmin
 from django.contrib.admin.models import LogEntry, CHANGE, ADDITION
 from django.contrib.contenttypes.models import ContentType
@@ -9,7 +15,6 @@ from .resources import UserResource
 from .models import *
 
 # Register your models here.
-
 @admin.register(User)
 class UserAdmin(ImportExportActionModelAdmin, ModelAdmin):
     # compressed_fields = True
@@ -26,6 +31,7 @@ class UserAdmin(ImportExportActionModelAdmin, ModelAdmin):
     search_fields = ['email', 'first_name', 'last_name',]
     list_display = ['email', 'first_name', 'last_name', 'code',]
     resource_classes = [UserResource]
+    autocomplete_fields = ['role', 'department', 'group']
     
     def _create_log_entry(self, request, obj, change_message, change=False):
         user_id = request if isinstance(request, int) else request.user.pk

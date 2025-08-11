@@ -1,6 +1,12 @@
+from django.conf import settings
+
+if settings.USE_UNFOLD:
+    from unfold.admin import ModelAdmin, TabularInline
+else:
+    from django.contrib.admin import ModelAdmin, TabularInline
+     
 from django.contrib import admin
 
-from django.contrib.admin import ModelAdmin
 from django.conf import settings
 
 from django.utils.html import format_html
@@ -9,17 +15,19 @@ from .models import *
 
 # Register your models here.
 
-class FormQuestionInline(admin.TabularInline):
+class FormQuestionInline(TabularInline):
     model = FormQuestion
     extra = 1
     fields = ['question', 'form_index']
     readonly_fields = ['created_at', 'updated_at']
+    autocomplete_fields = ['question']
 
-class FormUserInline(admin.TabularInline):
+class FormUserInline(TabularInline):
     model = FormUser
     extra = 0
     readonly_fields = ['created_at', 'updated_at']
     can_delete = False
+    autocomplete_fields = ['user']
 
 @admin.register(Form)
 class FormAdmin(ModelAdmin):
@@ -62,6 +70,7 @@ class QuestionsAdmin(ModelAdmin):
 class FormQuestionAdmin(ModelAdmin):
     list_display = ['form', 'question', 'form_index']
     search_fields = ['form', 'question']
+    autocomplete_fields = ['form', 'question']
     
     fieldsets = (
         ('Form Question', {'fields': ('id', 'form', 'question', 'form_index')}),
@@ -95,6 +104,7 @@ class FormUserAdmin(ModelAdmin):
     search_fields = ['user__code', 'user__email', 'form__name']
     list_filter = ['form', 'created_at']
     readonly_fields = ['created_at', 'updated_at']
+    autocomplete_fields = ['user', 'form']
     
     fieldsets = (
         ('Form Submission', {'fields': ('user', 'form')}),

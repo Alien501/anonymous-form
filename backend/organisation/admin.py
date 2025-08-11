@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from django.contrib.admin import ModelAdmin
+from django.conf import settings
+
+if settings.USE_UNFOLD:
+    from unfold.admin import ModelAdmin
+else:
+    from django.contrib.admin import ModelAdmin
 
 from .models import *
 
