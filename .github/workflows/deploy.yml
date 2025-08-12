@@ -24,6 +24,7 @@ jobs:
       - run: cd client && pnpm build
         env:
           VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
+          VITE_TARGET: ${{ secrets.VITE_TARGET }}
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -5,6 +5,8 @@ import { defineConfig } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 import path from "path";
 
+const TARGET = process.env.VITE_TARGET
+
 export default defineConfig({
   plugins: [
     tsConfigPaths({
@@ -18,7 +20,7 @@ export default defineConfig({
         quoteStyle: "double",
         semicolons: true,
       },
-      target: "vercel",
+      target: TARGET,
 
       // https://tanstack.com/start/latest/docs/framework/react/hosting#deployment
       // target: "node-server",
