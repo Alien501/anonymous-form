@@ -1,0 +1,74 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+
+pr: none
+
+variables:
+  clientWorkingDirectory: 'client'
+  nodeVersion: '22.x'
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: 'Build Client Application'
+  jobs:
+  - job: BuildJob
+    displayName: 'Build and Publish Artifact'
+    pool:
+      vmImage: $(vmImage)
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js $(nodeVersion)'
+      inputs:
+        versionSpec: $(nodeVersion)
+
+    - script: corepack enable
+      displayName: 'Enable Corepack for pnpm support'
+
+    - script: cd client && pnpm install
+      displayName: 'Install dependencies with pnpm'
+      workingDirectory: $(clientWorkingDirectory)
+
+    - script: cd client && pnpm build
+      displayName: 'Build client application'
+      workingDirectory: $(clientWorkingDirectory)
+      env:
+        VITE_BASE_URL: $(VITE_BASE_URL)
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish build artifact'
+      inputs:
+        targetPath: '$(clientWorkingDirectory)/.output/public'
+        artifact: 'client-dist'
+        publishLocation: 'pipeline'
+
+- stage: Deploy
+  displayName: 'Deploy to Production'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployToAzureStaticWebApp
+    displayName: 'Deploy to Azure Static Web App'
+    environment: 'production'
+    pool:
+      vmImage: $(vmImage)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Download build artifact'
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'client-dist'
+              downloadPath: '$(Pipeline.Workspace)/client-dist'
+
+          - task: AzureStaticWebApp@0
+            displayName: 'Deploy Azure Static Web App'
+            inputs:
+              azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APPS_API_TOKEN)
+              app_location: '$(Pipeline.Workspace)/client-dist'
