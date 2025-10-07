@@ -113,7 +113,7 @@ if True:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '/home' / 'db.sqlite3',
+            'NAME': '/home/db.sqlite3',
         }
     }
 else:
