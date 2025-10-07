@@ -41,7 +41,7 @@ jobs:
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           JWT_KEY: ${{ secrets.JWT_KEY }}
-          ENVIRONMENT: development # Just for test
+          ENVIRONMENT: production # Just for test
           COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN }}
           CLIENT_URL: ${{ secrets.CLIENT_URL }}
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}

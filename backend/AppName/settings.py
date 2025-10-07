@@ -169,7 +169,6 @@ if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 if DEBUG:
-    STATIC_ROOT = BASE_DIR / 'static'   # Not recommended
     STATICFILES_DIRS=[os.path.join(BASE_DIR, "static"),]
 else:
     STATIC_ROOT = BASE_DIR / 'staticfiles'
