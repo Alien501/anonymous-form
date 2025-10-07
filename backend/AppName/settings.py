@@ -29,7 +29,7 @@ ENVIRONMENT = config('ENVIRONMENT', 'production')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENVIRONMENT == 'development'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'forms.alien501.in', 'forms-api.alien501.in']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'forms.alien501.in', 'forms-api.alien501.in', 'anomyform-cfafgaeugudfc3gc.uaenorth-01.azurewebsites.net']
 
 CSRF_COOKIE_DOMAIN= config('COOKIE_DOMAIN')
 
@@ -187,6 +187,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://forms-api.alien501.in',
     'https://forms-api.alien501.in/',
     'http://localhost:3000',
+    'https://anomyform-cfafgaeugudfc3gc.uaenorth-01.azurewebsites.net/',
+    'https://anomyform-cfafgaeugudfc3gc.uaenorth-01.azurewebsites.net',
 ]
 
 CSRF_COOKIE_SAMESITE = 'Lax'
@@ -207,6 +209,7 @@ CORS_ALLOWED_ORIGINS = [
   "http://127.0.0.1:5173",
   'https://forms.alien501.in',
   'https://forms-api.alien501.in',
+  'https://anomyform-cfafgaeugudfc3gc.uaenorth-01.azurewebsites.net'
 ]
 
 CORS_ALLOW_CREDENTIALS = True
