@@ -13,6 +13,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: production-azure-flow
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -41,6 +42,7 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           JWT_KEY: ${{ secrets.JWT_KEY }}
           ENVIRONMENT: production
+          COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN }}
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
