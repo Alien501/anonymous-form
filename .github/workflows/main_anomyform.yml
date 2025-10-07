@@ -22,7 +22,7 @@ jobs:
       - name: Set up Python version
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.12.6'
 
       - name: Create and start virtual environment
         run: |
@@ -30,9 +30,17 @@ jobs:
           source venv/bin/activate
       
       - name: Install dependencies
+        working-directory: ./backend
+        run: pip install -r requirements.txt
+      
+      - name: Collect static files
+        working-directory: ./backend
         run: |
-        cd backend
-        pip install -r requirements.txt
+          python manage.py collectstatic --noinput
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
+          ENVIRONMENT: production
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
@@ -41,7 +49,7 @@ jobs:
         with:
           name: python-app
           path: |
-            .
+            backend/
             !venv/
 
   deploy:
