@@ -34,5 +34,5 @@ class ResendUserCodeAPI(APIView):
             user.send_user_code()
             return Response({'detail': 'User code sent to your email'}, status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
+            print("Exception", e)
             return Response({'detail': 'User does not exist'}, status=status.HTTP_400_BAD_REQUEST)
