@@ -34,6 +34,7 @@ jobs:
           ###### End of Repository/Build Configurations ######
         env:
           NODE_VERSION: '22.9.0'
+          VITE_TARGET: 'azure-swa'
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

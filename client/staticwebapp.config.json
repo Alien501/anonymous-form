@@ -1,0 +1,20 @@
+{
+  "routes": [
+    {
+      "route": "/*",
+      "rewrite": "/api/index"
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/api/index"
+  },
+  "platform": {
+    "apiRuntime": "node:20"
+  },
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/api/index"
+    }
+  }
+}
+
