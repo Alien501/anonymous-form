@@ -35,6 +35,8 @@ import {
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { useForm, useSubmitFormResponse } from "~/lib/api/form/useForm";
+import { AIFormFAB } from "~/components/ai-form-fab";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/form/edit/$formId/")({
   component: RouteComponent,
@@ -221,6 +223,66 @@ function RouteComponent() {
       ? (completedRequiredQuestions / requiredQuestions.length) * 100
       : 100;
 
+  const handleAIFillComplete = (aiResponses: Record<string, any>) => {
+    // Helper function to find matching option (handles spacing differences)
+    const findMatchingOption = (aiValue: string, options: string[]): string | null => {
+      // First try exact match
+      if (options.includes(aiValue)) return aiValue;
+      
+      // Try case-insensitive match with trimming
+      const normalizedAiValue = aiValue.trim().toLowerCase();
+      const match = options.find(opt => opt.trim().toLowerCase() === normalizedAiValue);
+      
+      return match || null;
+    };
+
+    // Update form responses with AI generated values
+    const updatedResponses: Record<string, any> = {};
+    
+    questions.forEach((formQuestion) => {
+      const questionId = formQuestion.question.id;
+      const aiValue = aiResponses[questionId];
+      
+      if (aiValue !== undefined && aiValue !== null) {
+        // Handle different answer types
+        const answerType = formQuestion.question.answer_type;
+        const question = formQuestion.question;
+        
+        if (answerType === 'file') {
+          // Skip file fields as they cannot be auto-filled
+          return;
+        } else if (answerType === 'checkbox') {
+          // Match checkbox options
+          const options = question.options ? question.options.split('||') : [];
+          const aiValues = Array.isArray(aiValue) ? aiValue : [aiValue];
+          const matchedValues = aiValues
+            .map(val => findMatchingOption(val, options))
+            .filter(val => val !== null) as string[];
+          updatedResponses[questionId] = matchedValues;
+        } else if (answerType === 'radio' || answerType === 'select') {
+          // Match radio/select option
+          const options = question.options ? question.options.split('||') : [];
+          const matchedValue = findMatchingOption(aiValue, options);
+          if (matchedValue) {
+            updatedResponses[questionId] = matchedValue;
+          }
+        } else if (answerType === 'boolean') {
+          // Ensure boolean values are proper booleans
+          updatedResponses[questionId] = Boolean(aiValue);
+        } else if (answerType === 'number') {
+          // Ensure number values are proper numbers
+          updatedResponses[questionId] = Number(aiValue);
+        } else {
+          // For text - use as is
+          updatedResponses[questionId] = aiValue;
+        }
+      }
+    });
+    
+    setFormResponses(updatedResponses);
+    toast.success("Review the AI-generated responses and make any necessary changes.");
+  };
+
   const handleSubmit = () => {
     if (!isFormValid) return;
 
@@ -304,10 +366,15 @@ function RouteComponent() {
         setIsSubmitted(true);
         setShowUserCodeModal(false);
         setUserCode("");
-        setIsSubmitted(false);
+        setUserCodeError("");
         setFormResponses({});
         setFileObjects({});
         setFileValidationErrors({});
+        
+        // Reset form after showing success message for 3 seconds
+        setTimeout(() => {
+          setIsSubmitted(false);
+        }, 3000);
       },
       onError: (error: any) => {
         console.error("Form submission failed:", error);
@@ -362,6 +429,7 @@ function RouteComponent() {
                   }));
                 }}
                 fileValidationError={fileValidationErrors[question.question.id]}
+                initialValue={formResponses[question.question.id]}
               />
             ))}
 
@@ -521,6 +589,11 @@ function RouteComponent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AI Form FAB - Only show if form has questions */}
+      {questions.length > 0 && !isSubmitted && (
+        <AIFormFAB formId={formId} onFillComplete={handleAIFillComplete} />
+      )}
     </div>
   );
 }
@@ -551,6 +624,7 @@ interface QuestionRendererProps {
   onFileChange: (questionId: string, file: File | null) => void;
   onFileValidationError: (questionId: string, error: string | null) => void;
   fileValidationError?: string;
+  initialValue?: string | number | boolean | string[];
 }
 
 function QuestionRenderer({
@@ -561,10 +635,27 @@ function QuestionRenderer({
   onFileChange,
   onFileValidationError,
   fileValidationError,
+  initialValue,
 }: QuestionRendererProps) {
-  const [value, setValue] = useState<string | number | boolean | string[]>("");
+  const [value, setValue] = useState<string | number | boolean | string[]>(initialValue || "");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
+
+  // Sync with parent state when initialValue changes (e.g., from AI fill or reset)
+  useEffect(() => {
+    if (initialValue !== undefined && initialValue !== null) {
+      setValue(initialValue);
+    } else if (initialValue === undefined || initialValue === null || initialValue === "") {
+      // Reset to initial state when parent clears the form
+      if (question.answer_type === 'checkbox') {
+        setValue([]);
+      } else {
+        setValue("");
+      }
+      setFile(null);
+      setError("");
+    }
+  }, [initialValue, question.answer_type]);
 
   const validateInput = (input: string | number | boolean | string[]) => {
     if (question.required) {

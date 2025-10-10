@@ -12,8 +12,10 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.conf import settings
 import json
+import google.generativeai as genai
+from decouple import config
 
-from .models import Form, FormResponse, FormUser
+from .models import Form, FormResponse, FormUser, FormQuestion
 from .serializers import FormSerializer
 from authentication.models import User
 
@@ -189,6 +191,140 @@ class SubmitFormResponse(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class AIFillFormAPI(APIView):
+    """
+    API endpoint to process natural language input and generate form responses using Google Gemini
+    """
+    def post(self, request):
+        try:
+            form_id = request.data.get('formId')
+            user_input = request.data.get('userInput', '').strip()
+            
+            if not form_id:
+                return Response(
+                    {"error": "Form ID is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            if not user_input:
+                return Response(
+                    {"error": "User input is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Get form and questions
+            try:
+                form = Form.objects.get(id=form_id, enable=True)
+            except Form.DoesNotExist:
+                return Response(
+                    {"error": "Form not found or disabled"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Get all form questions sorted by index
+            form_questions = FormQuestion.objects.filter(form=form).select_related('question').order_by('form_index')
+            
+            if not form_questions.exists():
+                return Response(
+                    {"error": "No questions found for this form"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Build the form structure for AI
+            questions_data = []
+            for fq in form_questions:
+                q = fq.question
+                question_info = {
+                    'id': str(q.id),
+                    'question': q.question,
+                    'answer_type': q.answer_type,
+                    'required': q.required,
+                }
+                
+                # Add options for multiple choice questions
+                if q.options:
+                    question_info['options'] = [opt.strip() for opt in q.options.split('||')]
+                
+                questions_data.append(question_info)
+            
+            # Configure Gemini AI
+            api_key = config('GEMINI_API_KEY')
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            
+            # Create the prompt
+            prompt = f"""You are a helpful AI assistant that fills out forms based on user input. 
+            
+The user has provided the following input:
+"{user_input}"
+
+Based on this input, please fill out the following form. Return ONLY a valid JSON object with question IDs as keys and appropriate values.
+
+Form Questions:
+{json.dumps(questions_data, indent=2)}
+
+Instructions:
+1. For 'text' type questions: provide a string value
+2. For 'number' type questions: provide a numeric value
+3. For 'boolean' type questions: provide true or false
+4. For 'radio' type questions: select ONE option EXACTLY as shown in the options array (including any spaces)
+5. For 'checkbox' type questions: provide an array with EXACT option values from the options array (including any spaces)
+6. For 'select' type questions: select ONE option EXACTLY as shown in the options array (including any spaces)
+7. For 'file' type questions: set the value to null (files cannot be auto-filled)
+8. If the user input doesn't provide information for a question, use null for non-required fields or make a reasonable inference for required fields
+9. Ensure all required fields have values (not null)
+10. IMPORTANT: For radio, checkbox, and select - copy the option values EXACTLY as they appear in the options array, do not trim spaces or modify them
+
+Return ONLY a JSON object in this exact format:
+{{
+  "question_id_1": "value1",
+  "question_id_2": 123,
+  "question_id_3": true,
+  "question_id_4": ["option1", "option2"],
+  ...
+}}
+
+Do not include any markdown, explanations, or additional text. Only return the raw JSON object."""
+
+            # Generate response
+            response = model.generate_content(prompt)
+            
+            # Parse the AI response
+            try:
+                # Extract JSON from response text
+                response_text = response.text.strip()
+                
+                # Remove markdown code blocks if present
+                if response_text.startswith('```'):
+                    response_text = response_text.split('```')[1]
+                    if response_text.startswith('json'):
+                        response_text = response_text[4:].strip()
+                
+                ai_responses = json.loads(response_text)
+                
+                logger.info(f"AI generated responses for form {form_id}: {ai_responses}")
+                
+                return Response({
+                    "success": True,
+                    "responses": ai_responses
+                }, status=status.HTTP_200_OK)
+                
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse AI response: {str(e)}")
+                logger.error(f"Raw response: {response.text}")
+                return Response(
+                    {"error": "Failed to parse AI response", "details": str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+        except Exception as e:
+            logger.error(f"AI form fill error: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "An error occurred while processing your request", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 '''
     {
     "user_code": "123453rt",

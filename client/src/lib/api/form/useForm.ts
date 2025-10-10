@@ -81,3 +81,27 @@ export const useInitializeCSRF = () => {
     gcTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 };
+
+// AI Form Fill Types
+export interface AIFillRequest {
+  formId: string;
+  userInput: string;
+}
+
+export interface AIFillResponse {
+  success: boolean;
+  responses: Record<string, any>;
+}
+
+// AI Form Fill API function
+const aiFillForm = async (data: AIFillRequest): Promise<AIFillResponse> => {
+  const response = await api.post("/forms/ai-fill", data);
+  return response.data;
+};
+
+// Hook to use AI form fill
+export const useAIFillForm = () => {
+  return useMutation({
+    mutationFn: aiFillForm,
+  });
+};
