@@ -53,8 +53,12 @@ class FormResponseInline(TabularInline):
     def get_formset(self, request, obj=None, **kwargs):
         formset = super().get_formset(request, obj, **kwargs)
         
-        # Prepare response table data for the template
-        if obj:
+        # Initialize defaults
+        formset.response_table_data = {'headers': [], 'rows': []}
+        formset.has_responses = False
+        
+        # Prepare response table data for the template (only for existing forms)
+        if obj and obj.pk:
             # Get questions for this form
             form_questions = obj.formquestion_set.select_related('question').order_by('form_index')
             questions = [fq.question for fq in form_questions]
@@ -147,6 +151,15 @@ class FormAdmin(ModelAdmin):
         ('Form Meta', {'fields': ('created_at', 'updated_at')}),
     )
     readonly_fields = ['created_at', 'updated_at', 'id']
+    
+    def get_inlines(self, request, obj=None):
+        """Only show FormResponseInline when editing existing forms"""
+        if obj and obj.pk:
+            # Editing existing form - show all inlines including responses
+            return [FormQuestionInline, FormUserInline, FormResponseInline]
+        else:
+            # Creating new form - don't show responses inline
+            return [FormQuestionInline, FormUserInline]
 
     def form_link(self, obj):
         return format_html(f"<a target='_' href='{settings.CLIENT_URL}/form/edit/{obj.id}'>View Form</a>")
