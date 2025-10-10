@@ -36,26 +36,51 @@ class FormResponseInline(TabularInline):
     """Custom inline to display form responses as a tab"""
     model = FormResponse
     extra = 0
-    can_delete = True
+    can_delete = False
     tab = True  # Create tab for responses
     verbose_name = "Response"
     verbose_name_plural = "Form Responses"
     template = "custom/forms/form_response_inline_tab.html"
     
-    # Make it read-only (no add)
+    # Make it completely read-only
     def has_add_permission(self, request, obj=None):
         return False
     
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        return qs.order_by('-created_at')
+        # Return empty queryset to prevent any form rendering
+        return self.model.objects.none()
     
     def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
+        # Set validate_max to False to prevent validation errors
+        kwargs['validate_max'] = False
+        kwargs['validate_min'] = False
+        
+        formset_class = super().get_formset(request, obj, **kwargs)
+        
+        # Make the formset always valid and never save
+        def always_valid(self):
+            return True
+        
+        original_save = formset_class.save
+        def no_save(self, commit=True):
+            # Return empty lists for new_objects, changed_objects, deleted_objects
+            self.new_objects = []
+            self.changed_objects = []
+            self.deleted_objects = []
+            return []
+        
+        formset_class.is_valid = always_valid
+        formset_class.save = no_save
         
         # Initialize defaults
-        formset.response_table_data = {'headers': [], 'rows': []}
-        formset.has_responses = False
+        formset_class.response_table_data = {'headers': [], 'rows': []}
+        formset_class.has_responses = False
         
         # Prepare response table data for the template (only for existing forms)
         if obj and obj.pk:
@@ -129,14 +154,14 @@ class FormResponseInline(TabularInline):
                 rows.append(row)
             
             # Attach to formset so template can access
-            formset.response_table_data = {
+            formset_class.response_table_data = {
                 'headers': headers,
                 'rows': rows
             }
-            formset.has_responses = responses.exists()
+            formset_class.has_responses = responses.exists()
         
-        return formset
-    
+        return formset_class
+            
 @admin.register(Form)
 class FormAdmin(ModelAdmin):
     compressed_fields = True
