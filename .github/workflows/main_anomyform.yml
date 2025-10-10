@@ -83,4 +83,8 @@ jobs:
         with:
           app-name: 'AnomyForm'
           slot-name: 'Production'
+      
+      - name: Run database migrations
+        run: |
+          az webapp ssh --name AnomyForm --resource-group AnomyFormResourceGroup --command "cd /home/site/wwwroot && python manage.py migrate --noinput"
           
