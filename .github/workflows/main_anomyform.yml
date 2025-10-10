@@ -46,6 +46,7 @@ jobs:
           CLIENT_URL: ${{ secrets.CLIENT_URL }}
           EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
           EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          DB_NAME: "dummy-name"
           DB_USER: "dummy-user"
           DB_PASSWORD: "dummy-password"
           DB_HOST: "dummy-host"
