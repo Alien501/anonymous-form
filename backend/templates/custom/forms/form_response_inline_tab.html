@@ -1,0 +1,20 @@
+{% load unfold %}
+{% load i18n %}
+
+<div class="inline-group" id="{{ inline_admin_formset.formset.prefix }}-group">
+    {% if inline_admin_formset.formset.response_table_data and inline_admin_formset.formset.has_responses %}
+        <div class="p-4">
+            {% component "unfold/components/table.html" with table=inline_admin_formset.formset.response_table_data striped=1 %}
+            {% endcomponent %}
+        </div>
+    {% else %}
+        <div class="p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-base-400 dark:text-base-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="mt-4 text-lg text-base-600 dark:text-base-400">No responses yet for this form.</p>
+            <p class="mt-2 text-sm text-base-500 dark:text-base-500">Responses will appear here once users submit the form.</p>
+        </div>
+    {% endif %}
+</div>
+

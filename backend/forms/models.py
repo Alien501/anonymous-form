@@ -103,7 +103,7 @@ class FormUser(models.Model):
     
 class FormResponse(models.Model):
     id = models.UUIDField(default=uuid.uuid1, editable=False, primary_key=True, unique=True)
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name="form_user_response")
     response = models.JSONField("User Response")
     
     created_at = models.DateTimeField("Created At", auto_now_add=True)
