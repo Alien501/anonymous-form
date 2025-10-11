@@ -43,7 +43,7 @@ const fetchForm = async (formId: string): Promise<Form> => {
 const submitFormResponse = async (
   data: FormData | FormSubmissionData,
 ): Promise<FormSubmissionResponse> => {
-  const response = await api.post("/forms/submit", data, {
+  const response = await api.post("/forms/submit/", data, {
     headers: {
       "Content-Type":
         data instanceof FormData ? "multipart/form-data" : "application/json",
@@ -95,7 +95,7 @@ export interface AIFillResponse {
 
 // AI Form Fill API function
 const aiFillForm = async (data: AIFillRequest): Promise<AIFillResponse> => {
-  const response = await api.post("/forms/ai-fill", data);
+  const response = await api.post("/forms/ai-fill/", data);
   return response.data;
 };
 
