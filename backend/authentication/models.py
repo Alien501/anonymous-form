@@ -76,7 +76,11 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if not self.password.startswith('pbkdf2_sha256$'):
             self.password = make_password(self.password)
-        super().clean()
+        
+        # Generate user code if empty
+        if not self.code or self.code.strip() == "":
+            self.code = self.generate_user_code()
+        
         super().save(*args, **kwargs)
 
     def get_name(self):

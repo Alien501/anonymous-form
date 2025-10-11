@@ -53,8 +53,6 @@ jobs:
           DB_USER: "dummy-user"
           DB_PASSWORD: "dummy-password"
           DB_HOST: "dummy-host"
-        
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
@@ -64,9 +62,76 @@ jobs:
             backend/
             !venv/
 
-  deploy:
+  test:
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.6'
+
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run Database Migrations
+        working-directory: ./backend
+        run: |
+          python manage.py migrate --noinput
+        env:
+          SECRET_KEY: test-secret-key-for-ci
+          JWT_KEY: test-jwt-key-for-ci
+          ENVIRONMENT: development
+          COOKIE_DOMAIN: localhost
+          CLIENT_URL: http://localhost:3000
+          EMAIL_HOST_PASSWORD: test-password
+          EMAIL_HOST_USER: test@example.com
+      
+      - name: Run Tests with Pytest
+        working-directory: ./backend
+        run: |
+          pytest --verbose --cov=. --cov-report=term-missing --cov-report=xml --cov-report=html
+        env:
+          SECRET_KEY: test-secret-key-for-ci
+          JWT_KEY: test-jwt-key-for-ci
+          ENVIRONMENT: development
+          COOKIE_DOMAIN: localhost
+          CLIENT_URL: http://localhost:3000
+          EMAIL_HOST_PASSWORD: test-password
+          EMAIL_HOST_USER: test@example.com
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      
+      - name: Upload Coverage Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            backend/htmlcov/
+            backend/coverage.xml
+      
+      - name: Display Test Summary
+        if: always()
+        run: |
+          echo "## Test Results 🧪" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Tests completed successfully!" >> $GITHUB_STEP_SUMMARY
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, test]
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
