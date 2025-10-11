@@ -1,0 +1,33 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'backend/**' ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Login to ACR
+      run: |
+        az acr login --name anomyformcontainerregistry
+        
+    - name: Build and push backend image
+      run: |
+        cd backend
+        docker build -t anomyformcontainerregistry.azurecr.io/anonymous-form-backend:latest .
+        docker push anomyformcontainerregistry.azurecr.io/anonymous-form-backend:latest
+        
+    - name: Deploy to Azure App Service
+      run: |
+        az webapp config container set --name AnomyFormDocker --resource-group ${{ secrets.RESOURCE_GROUP }} --docker-custom-image-name anomyformcontainerregistry.azurecr.io/anonymous-form-backend:latest
