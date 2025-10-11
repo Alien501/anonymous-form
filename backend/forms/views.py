@@ -193,9 +193,6 @@ class SubmitFormResponse(APIView):
             )
 
 class AIFillFormAPI(APIView):
-    """
-    API endpoint to process natural language input and generate form responses using Google Gemini
-    """
     def post(self, request):
         try:
             form_id = request.data.get('formId')
@@ -213,7 +210,6 @@ class AIFillFormAPI(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Get form and questions
             try:
                 form = Form.objects.get(id=form_id, enable=True)
             except Form.DoesNotExist:
@@ -221,8 +217,6 @@ class AIFillFormAPI(APIView):
                     {"error": "Form not found or disabled"},
                     status=status.HTTP_404_NOT_FOUND
                 )
-            
-            # Get all form questions sorted by index
             form_questions = FormQuestion.objects.filter(form=form).select_related('question').order_by('form_index')
             
             if not form_questions.exists():
@@ -231,7 +225,6 @@ class AIFillFormAPI(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Build the form structure for AI
             questions_data = []
             for fq in form_questions:
                 q = fq.question
@@ -242,18 +235,15 @@ class AIFillFormAPI(APIView):
                     'required': q.required,
                 }
                 
-                # Add options for multiple choice questions
                 if q.options:
                     question_info['options'] = [opt.strip() for opt in q.options.split('||')]
                 
                 questions_data.append(question_info)
             
-            # Configure Gemini AI
             api_key = config('GEMINI_API_KEY')
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-2.5-flash')
             
-            # Create the prompt
             prompt = f"""You are a helpful AI assistant that fills out forms based on user input. 
             
 The user has provided the following input:
@@ -287,15 +277,11 @@ Return ONLY a JSON object in this exact format:
 
 Do not include any markdown, explanations, or additional text. Only return the raw JSON object."""
 
-            # Generate response
             response = model.generate_content(prompt)
             
-            # Parse the AI response
             try:
-                # Extract JSON from response text
                 response_text = response.text.strip()
                 
-                # Remove markdown code blocks if present
                 if response_text.startswith('```'):
                     response_text = response_text.split('```')[1]
                     if response_text.startswith('json'):
