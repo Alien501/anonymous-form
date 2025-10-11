@@ -31,4 +31,4 @@ jobs:
         
     - name: Deploy to Azure App Service
       run: |
-        az webapp config container set --name AnomyFormDocker --resource-group ${{ secrets.RESOURCE_GROUP }} --docker-custom-image-name anomyformcontainerregistry.azurecr.io/anonymous-form-backend:latest
+        az webapp config container set --name AnomyFormDocker --resource-group AnomyFormResourceGroup --docker-custom-image-name anomyformcontainerregistry.azurecr.io/anonymous-form-backend:latest
