@@ -143,10 +143,28 @@ class SubmitFormResponse(APIView):
                         upload_dir = os.path.join(settings.MEDIA_ROOT, 'form_uploads', str(form_id), str(user.id))
                         os.makedirs(upload_dir, exist_ok=True)
                         
-                        # Generate unique filename
-                        file_extension = os.path.splitext(uploaded_file.name)[1]
+                        # Generate unique filename with secure extension validation
+                        original_filename = uploaded_file.name
+                        # Secure the filename by removing path separators and dangerous characters
+                        secure_filename = os.path.basename(original_filename)
+                        # Extract extension safely
+                        file_extension = os.path.splitext(secure_filename)[1]
+                        # Validate extension against allowed list
+                        allowed_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.pdf', '.doc', '.docx', '.txt', '.csv', '.xlsx', '.xls'}
+                        if file_extension.lower() not in allowed_extensions:
+                            file_extension = '.txt'  # Default safe extension
                         unique_filename = f"{uuid.uuid4()}{file_extension}"
                         file_path = os.path.join(upload_dir, unique_filename)
+                        
+                        # Additional security: Ensure the constructed path is within the expected directory
+                        normalized_path = os.path.normpath(file_path)
+                        normalized_upload_dir = os.path.normpath(upload_dir)
+                        if not normalized_path.startswith(normalized_upload_dir):
+                            logger.error(f"Path injection attempt detected: {original_filename}")
+                            return Response(
+                                {"message": "Invalid file path detected"},
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
                         
                         # Save the file
                         with open(file_path, 'wb+') as destination:
